@@ -315,6 +315,7 @@ impl<
                 }
             }
 
+            vita.wait_rendering_done();
             vita.swap_buffers();
             // `draw` is dropped here → vita2d_end_drawing() called
 
