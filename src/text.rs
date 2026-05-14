@@ -49,10 +49,10 @@ impl Widget for Text<'_> {
     fn draw(&self, x: f32, y: f32, draw: &Drawing, style: &StyleSheet) {
         let color = self.color.unwrap_or(style.text_color);
         let scale = self.scale * style.font_scale;
-
+        let baseline_y = y + style.line_height(scale);
         style
             .font
-            .draw_text(x as i32, y as i32, color, scale, &self.content, draw);
+            .draw_text(x as i32, baseline_y as i32, color, scale, &self.content, draw);
     }
 
     fn bounds(&self, x: f32, y: f32, style: &StyleSheet) -> Rect {

@@ -132,7 +132,7 @@ impl Widget for Menu {
         if let Some(ref title) = self.title {
             style.font.draw_text(
                 (x + style.padding * 2.0) as i32,
-                (cy + (title_h - title_line_h) / 2.0) as i32,
+                (cy + (title_h - title_line_h) / 2.0 + title_line_h) as i32,
                 style.menu_text,
                 style.font_scale * 0.9,
                 title,
@@ -160,7 +160,7 @@ impl Widget for Menu {
 
             style.font.draw_text(
                 (x + style.padding * 2.0) as i32,
-                (iy + (item_h - item_line_h) / 2.0) as i32,
+                (iy + (item_h - item_line_h) / 2.0 + item_line_h) as i32,
                 style.menu_text,
                 style.font_scale,
                 &item.label,

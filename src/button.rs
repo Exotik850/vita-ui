@@ -112,7 +112,7 @@ impl Widget for Button {
 
         // Label — centered using actual font metrics
         let tx = x + (w - text_w) / 2.0;
-        let ty = y + (h - line_h) / 2.0;
+        let ty = y + (h - line_h) / 2.0 + line_h;
         style.font.draw_text(
             tx as i32,
             ty as i32,
