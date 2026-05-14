@@ -1,0 +1,20 @@
+[package]
+name = "vita-ui"
+version = "0.1.0"
+edition = "2024"
+description = "A modeless, immediate-mode-style UI framework for PlayStation Vita homebrew"
+license = "MIT"
+
+[dependencies]
+vita-input = { version = "0.2.2" }
+vita2d-rs = { path = "../vita2d-rs" } 
+
+[package.metadata.vita]
+title_id = "VITAUIT00"
+
+[[example]]
+name = "hello_vitaui"
+path = "examples/hello_vitaui.rs"
+
+[features]
+bindgen = ["vita-input/bindgen", "vita2d-rs/bindgen"]
