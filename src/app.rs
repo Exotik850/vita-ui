@@ -94,6 +94,8 @@ impl Default for AppConfig {
 ///     });
 /// app.run();
 /// ```
+/// 
+/// TODO: Focus management, input routing, event bus, audio, etc.
 pub struct App<
     State = (),
     Init = NoOp,

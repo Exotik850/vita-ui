@@ -4,10 +4,8 @@
 //! Layout positions are provided by Taffy and passed via a [`Rect`].
 
 use taffy::{
-    Style,
     prelude::{AvailableSpace, Size},
 };
-use vita_input::ControllerInput;
 use vita2d_rs::prelude::{Color, Drawing};
 
 use crate::style::StyleSheet;
@@ -50,10 +48,8 @@ pub trait Widget {
         available_space: Size<AvailableSpace>,
     ) -> Size<f32>;
 
-    /// Handle an input event. Returns `true` if the event was consumed.
-    ///
-    /// The default implementation does nothing and returns `false`.
-    fn handle_input(&mut self, _input: &ControllerInput) -> bool {
+    /// Handle a controller input event. Return true if the event was handled.
+    fn handle_input(&mut self, _input: &vita_input::ControllerInput) -> bool {
         false
     }
 }
@@ -75,7 +71,7 @@ where
         <T as Widget>::measure(*self, style, known_dimensions, available_space)
     }
 
-    fn handle_input(&mut self, _input: &ControllerInput) -> bool {
+    fn handle_input(&mut self, _input: &vita_input::ControllerInput) -> bool {
         false
     }
 }
@@ -97,13 +93,9 @@ where
         <T as Widget>::measure(&**self, style, known_dimensions, available_space)
     }
 
-    fn handle_input(&mut self, input: &ControllerInput) -> bool {
+    fn handle_input(&mut self, input: &vita_input::ControllerInput) -> bool {
         <T as Widget>::handle_input(&mut **self, input)
     }
-}
-
-pub trait StyledWidget: Widget {
-    fn style(&self) -> Style;
 }
 
 // ---------------------------------------------------------------------------

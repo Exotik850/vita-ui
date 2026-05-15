@@ -44,7 +44,6 @@ impl LayoutTree<'_> {
 }
 
 impl<'a> LayoutTree<'a> {
-
     /// Add a container (non-leaf) node with the given style and children.
     pub fn add_container(&mut self, style: Style, children: &[NodeId]) -> NodeId {
         self.taffy

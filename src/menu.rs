@@ -3,7 +3,7 @@
 use std::borrow::Cow;
 
 use taffy::prelude::{AlignItems, AvailableSpace, Size};
-use vita_input::Button;
+use vita_input::{Button, ControllerInput};
 use vita2d_rs::prelude::Drawing;
 
 use crate::layout::{FlexDir, LayoutTree};
@@ -193,6 +193,23 @@ impl<'a> Menu<'a> {
             }
         }
     }
+
+    pub fn handle_input(&mut self, input: &ControllerInput) -> bool {
+        let mut consumed = false;
+        if input.is_pressed(Button::Up) {
+            self.select_prev();
+            consumed = true;
+        }
+        if input.is_pressed(Button::Down) {
+            self.select_next();
+            consumed = true;
+        }
+        if input.is_pressed(Button::Cross) {
+            self.activate();
+            consumed = true;
+        }
+        consumed
+    }
 }
 
 impl<'a> Widget for Menu<'a> {
@@ -284,19 +301,6 @@ impl<'a> Widget for Menu<'a> {
     }
 
     fn handle_input(&mut self, input: &vita_input::ControllerInput) -> bool {
-        let mut consumed = false;
-        if input.is_pressed(Button::Up) {
-            self.select_prev();
-            consumed = true;
-        }
-        if input.is_pressed(Button::Down) {
-            self.select_next();
-            consumed = true;
-        }
-        if input.is_pressed(Button::Cross) {
-            self.activate();
-            consumed = true;
-        }
-        consumed
+        self.handle_input(input)
     }
 }

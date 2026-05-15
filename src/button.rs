@@ -77,6 +77,23 @@ impl Button {
     pub fn is_focused(&self) -> bool {
         self.focused
     }
+
+    fn handle_input(&mut self, input: &vita_input::ControllerInput) -> bool {
+        if !self.focused {
+            self.state = ButtonVisual::Idle;
+            return false;
+        }
+        if input.is_pressed(vita_input::Button::Cross) {
+            self.state = ButtonVisual::Pressed;
+            if let Some(ref mut cb) = self.on_click {
+                cb();
+            }
+            return true;
+        } else {
+            self.state = ButtonVisual::Focused;
+            return self.focused;
+        }
+    }
 }
 
 impl Widget for Button {
@@ -133,7 +150,10 @@ impl Widget for Button {
         let w = self.width.unwrap_or(text_w + style.padding * 2.0);
         let h = self.height.unwrap_or(line_h + style.padding * 2.0);
 
-        let mut size = Size { width: w, height: h };
+        let mut size = Size {
+            width: w,
+            height: h,
+        };
         if let Some(w) = known_dimensions.width {
             size.width = w;
         }
@@ -145,21 +165,6 @@ impl Widget for Button {
     }
 
     fn handle_input(&mut self, input: &vita_input::ControllerInput) -> bool {
-        if self.focused {
-            if input.is_pressed(vita_input::Button::Cross) {
-                self.state = ButtonVisual::Pressed;
-                if let Some(ref mut cb) = self.on_click {
-                    cb();
-                }
-                return true;
-            } else {
-                self.state = ButtonVisual::Focused;
-                return self.focused;
-            }
-        } else {
-            self.state = ButtonVisual::Idle;
-        }
-
-        false
+        self.handle_input(input)
     }
 }
