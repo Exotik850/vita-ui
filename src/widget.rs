@@ -1,9 +1,13 @@
 //! The [`Widget`] trait — the common interface for all UI elements.
 //!
-//! Every widget can draw itself and report its bounding box.  Widgets are
-//! stateless in the sense that they don't own their own position — the
-//! caller passes `x, y` at draw time.
+//! Every widget can draw itself and report its intrinsic size for layout.
+//! Layout positions are provided by Taffy and passed via a [`Rect`].
 
+use taffy::{
+    Style,
+    prelude::{AvailableSpace, Size},
+};
+use vita_input::ControllerInput;
 use vita2d_rs::prelude::{Color, Drawing};
 
 use crate::style::StyleSheet;
@@ -32,24 +36,74 @@ impl Rect {
 /// The common interface for all UI widgets.
 ///
 /// Implementors must provide [`draw`](Widget::draw) and
-/// [`bounds`](Widget::bounds).  The default [`handle_input`](Widget::handle_input)
+/// [`measure`](Widget::measure). The default [`handle_input`](Widget::handle_input)
 /// does nothing.
 pub trait Widget {
-    /// Draw the widget at `(x, y)`.
-    fn draw(&self, x: f32, y: f32, draw: &Drawing, style: &StyleSheet);
+    /// Draw the widget inside the given `rect`.
+    fn draw(&self, rect: Rect, draw: &Drawing, style: &StyleSheet);
 
-    /// Return the bounding box of the widget when drawn at `(x, y)`.
-    fn bounds(&self, x: f32, y: f32, style: &StyleSheet) -> Rect;
+    /// Return the intrinsic size of the widget for layout.
+    fn measure(
+        &self,
+        style: &StyleSheet,
+        known_dimensions: Size<Option<f32>>,
+        available_space: Size<AvailableSpace>,
+    ) -> Size<f32>;
 
-    /// Handle an input event.  Returns `true` if the event was consumed.
+    /// Handle an input event. Returns `true` if the event was consumed.
     ///
     /// The default implementation does nothing and returns `false`.
-    fn handle_input(
-        &mut self,
-        _input: &vita_input::ControllerInput,
-    ) -> bool {
+    fn handle_input(&mut self, _input: &ControllerInput) -> bool {
         false
     }
+}
+
+impl<T> Widget for &T
+where
+    T: Widget + ?Sized,
+{
+    fn draw(&self, rect: Rect, draw: &Drawing, style: &StyleSheet) {
+        <T as Widget>::draw(*self, rect, draw, style);
+    }
+
+    fn measure(
+        &self,
+        style: &StyleSheet,
+        known_dimensions: Size<Option<f32>>,
+        available_space: Size<AvailableSpace>,
+    ) -> Size<f32> {
+        <T as Widget>::measure(*self, style, known_dimensions, available_space)
+    }
+
+    fn handle_input(&mut self, _input: &ControllerInput) -> bool {
+        false
+    }
+}
+
+impl<T> Widget for &mut T
+where
+    T: Widget + ?Sized,
+{
+    fn draw(&self, rect: Rect, draw: &Drawing, style: &StyleSheet) {
+        <T as Widget>::draw(&**self, rect, draw, style);
+    }
+
+    fn measure(
+        &self,
+        style: &StyleSheet,
+        known_dimensions: Size<Option<f32>>,
+        available_space: Size<AvailableSpace>,
+    ) -> Size<f32> {
+        <T as Widget>::measure(&**self, style, known_dimensions, available_space)
+    }
+
+    fn handle_input(&mut self, input: &ControllerInput) -> bool {
+        <T as Widget>::handle_input(&mut **self, input)
+    }
+}
+
+pub trait StyledWidget: Widget {
+    fn style(&self) -> Style;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,11 +155,23 @@ pub(crate) fn draw_rounded_rect_border(
     // Top edge
     draw.draw_rectangle(x + radius, y, w - radius * 2.0, thickness, color);
     // Bottom edge
-    draw.draw_rectangle(x + radius, y + h - thickness, w - radius * 2.0, thickness, color);
+    draw.draw_rectangle(
+        x + radius,
+        y + h - thickness,
+        w - radius * 2.0,
+        thickness,
+        color,
+    );
     // Left edge
     draw.draw_rectangle(x, y + radius, thickness, h - radius * 2.0, color);
     // Right edge
-    draw.draw_rectangle(x + w - thickness, y + radius, thickness, h - radius * 2.0, color);
+    draw.draw_rectangle(
+        x + w - thickness,
+        y + radius,
+        thickness,
+        h - radius * 2.0,
+        color,
+    );
 
     // Corner arcs — approximate with small circles
     let t = thickness / 2.0;

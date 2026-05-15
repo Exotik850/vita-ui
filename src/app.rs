@@ -13,7 +13,9 @@ use crate::style::StyleSheet;
 
 #[derive(Debug, Clone, Copy)]
 pub enum InputHandling {
+    /// Poll the controller state each frame and pass it to the input callback.
     Polling,
+    /// Block and wait for input events, passing them to the input callback as they arrive.
     Blocking,
 }
 
@@ -25,7 +27,7 @@ pub struct AppConfig {
     pub target_fps: Option<u32>,
     /// Enable or disable V-Sync (vertical blank synchronisation).
     pub vsync: bool,
-    pub block_input: InputHandling, // If true, vita2d will block until the next input event instead of polling.
+    pub block_input: InputHandling,
 }
 
 impl AppConfig {

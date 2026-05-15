@@ -1,10 +1,9 @@
 //! A simple text label widget.
 
 use std::borrow::Cow;
-use std::rc::Rc;
-use std::sync::{Arc, OnceLock};
 
-use vita2d_rs::prelude::{Color, Drawing, Pgf, VitaFont};
+use taffy::prelude::{AvailableSpace, Size};
+use vita2d_rs::prelude::{Color, Drawing};
 
 use crate::style::StyleSheet;
 use crate::widget::{Rect, Widget};
@@ -46,20 +45,39 @@ impl<'a> Text<'a> {
 }
 
 impl Widget for Text<'_> {
-    fn draw(&self, x: f32, y: f32, draw: &Drawing, style: &StyleSheet) {
+    fn draw(&self, rect: Rect, draw: &Drawing, style: &StyleSheet) {
         let color = self.color.unwrap_or(style.text_color);
         let scale = self.scale * style.font_scale;
-        let baseline_y = y + style.line_height(scale);
-        style
-            .font
-            .draw_text(x as i32, baseline_y as i32, color, scale, &self.content, draw);
+        let baseline_y = rect.y + style.line_height(scale);
+        style.font.draw_text(
+            rect.x as i32,
+            baseline_y as i32,
+            color,
+            scale,
+            &self.content,
+            draw,
+        );
     }
 
-    fn bounds(&self, x: f32, y: f32, style: &StyleSheet) -> Rect {
+    fn measure(
+        &self,
+        style: &StyleSheet,
+        known_dimensions: Size<Option<f32>>,
+        _available_space: Size<AvailableSpace>,
+    ) -> Size<f32> {
         let scale = self.scale * style.font_scale;
         let (w, h) = style.font.text_dimensions(scale, &self.content);
-        let w = w as f32;
-        let h = h as f32;
-        Rect::new(x, y, w, h)
+        let mut size = Size {
+            width: w as f32,
+            height: h as f32,
+        };
+        if let Some(w) = known_dimensions.width {
+            size.width = w;
+        }
+        if let Some(h) = known_dimensions.height {
+            size.height = h;
+        }
+
+        size
     }
 }

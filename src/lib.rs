@@ -19,11 +19,12 @@
 //! ```
 
 // pub mod input;
-pub mod style;
-pub mod widget;
-pub mod text;
 pub mod button;
+pub mod layout;
 pub mod menu;
+pub mod style;
+pub mod text;
+pub mod widget;
 
 mod app;
 
@@ -36,15 +37,16 @@ pub use app::{
 pub mod prelude {
     pub use crate::app::{
         App, AppConfig, AppEventReceiver, AppInit, AppInput, AppRender, AppUpdate, FrameCtx,
-        RenderCtx, InputHandling
+        InputHandling, RenderCtx,
     };
     pub use crate::button::Button;
     // pub use crate::input::{ButtonState, VitaInput};
+    pub use crate::layout::{Flex, FlexDir, LayoutTree, Spacer};
     pub use crate::menu::Menu;
     pub use crate::style::{Style, StyleSheet};
     pub use crate::text::Text;
     pub use crate::widget::Widget;
 
-    pub use vita2d_rs::prelude::*;
     pub use vita_input::ControllerInput;
+    pub use vita2d_rs::prelude::*;
 }

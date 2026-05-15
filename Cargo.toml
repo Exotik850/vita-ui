@@ -6,6 +6,7 @@ description = "A modeless, immediate-mode-style UI framework for PlayStation Vit
 license = "MIT"
 
 [dependencies]
+taffy = "0.10"
 vita-input = { version = "0.2.2" }
 vita2d-rs = { path = "../vita2d-rs" } 
 
