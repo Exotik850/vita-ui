@@ -8,7 +8,7 @@
 use std::borrow::Cow;
 
 use vita_input::ControllerInput;
-use vita_ui::{menu::MenuItem, prelude::*};
+use vita_ui::{menu::MenuItem, prelude::*, widget::IntoWidget};
 
 /// The application state.
 struct AppState {
@@ -33,7 +33,7 @@ fn main() {
     let (tx, rx) = std::sync::mpsc::sync_channel(4);
 
     // TODO: Better way to send messages / hold state
-    // maybe use dioxus state? something similar? 
+    // maybe use dioxus state? something similar?
     let menu_items = vec![
         MenuItem::new("Increment Counter").on_select({
             let tx = tx.clone();
@@ -71,12 +71,7 @@ fn main() {
     App::new()
         .with_state(state)
         .with_style(StyleSheet::default().with_font_scale(0.75))
-        .with_config(
-            AppConfig::new()
-                .with_vsync(true)
-                .with_target_fps(60)
-                .with_block_input(InputHandling::Blocking),
-        )
+        .with_config(AppConfig::new().with_vsync(true).with_target_fps(60))
         .with_init(|state: &mut AppState| {
             state.status = "vita-ui initialised!".into();
         })
@@ -121,14 +116,14 @@ fn main() {
             // --- Build the layout tree ---
             // We rebuild each frame so the tree reflects current state.
             let mut tree = LayoutTree::new();
-            
 
             let root = tree.flex_with(FlexDir::Column, |flex| {
                 flex.padding(16.0).gap(12.0);
 
                 // --- Title ---
                 flex.add_widget(
-                    Text::new("vita-ui Demo")
+                    "vita-ui Demo"
+                        .into_widget()
                         .with_color(Color::rgba(255, 220, 64, 255))
                         .with_scale(1.5),
                 );
@@ -143,12 +138,14 @@ fn main() {
                             panel.padding(8.0).gap(8.0);
 
                             panel.add_widget(
-                                Text::new("Info Panel")
+                                "Info Panel"
+                                    .into_widget()
                                     .with_color(Color::rgba(128, 200, 255, 255))
                                     .with_scale(1.0),
                             );
                             panel.add_widget(
-                                Text::new("This panel can be toggled from the menu.")
+                                "This panel can be toggled from the menu."
+                                    .into_widget()
                                     .with_color(Color::rgba(200, 200, 220, 255))
                                     .with_scale(0.7),
                             );
@@ -163,24 +160,24 @@ fn main() {
 
                 // --- Status text ---
                 flex.add_widget(
-                    Text::new(state.status.as_ref())
+                    state
+                        .status
+                        .as_ref()
+                        .into_widget()
                         .with_color(Color::rgba(180, 180, 200, 255))
                         .with_scale(0.8),
                 );
 
                 // --- Counter display ---
-                flex.add_widget(
-                    Text::new(format!("Counter: {}", state.counter))
-                        .with_color(Color::WHITE)
-                        .with_scale(1.0),
-                );
+                flex.add_widget(format!("Counter: {}", state.counter));
 
                 // --- Flex spacer to push footer to bottom ---
                 flex.add_flex_spacer(1.0);
 
                 // --- Footer ---
                 flex.add_widget(
-                    Text::new("Use D-Pad to navigate, Cross to select.")
+                    "Use D-Pad to navigate, Cross to select."
+                        .into_widget()
                         .with_color(Color::rgba(128, 128, 128, 255))
                         .with_scale(0.6),
                 );

@@ -27,7 +27,6 @@ pub struct AppConfig {
     pub target_fps: Option<u32>,
     /// Enable or disable V-Sync (vertical blank synchronisation).
     pub vsync: bool,
-    pub block_input: InputHandling,
 }
 
 impl AppConfig {
@@ -47,12 +46,6 @@ impl AppConfig {
         self.vsync = vsync;
         self
     }
-
-    /// Builder: enable or disable input blocking.
-    pub fn with_block_input(mut self, block_input: InputHandling) -> Self {
-        self.block_input = block_input;
-        self
-    }
 }
 
 impl Default for AppConfig {
@@ -60,7 +53,6 @@ impl Default for AppConfig {
         Self {
             target_fps: Some(60),
             vsync: true,
-            block_input: InputHandling::Polling,
         }
     }
 }
@@ -94,7 +86,7 @@ impl Default for AppConfig {
 ///     });
 /// app.run();
 /// ```
-/// 
+///
 /// TODO: Focus management, input routing, event bus, audio, etc.
 pub struct App<
     State = (),

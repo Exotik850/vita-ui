@@ -4,7 +4,7 @@
 //! that all widgets reference.  Stylesheets are cheap to clone (they use
 //! `Arc` internally for font handles).
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use vita2d_rs::{
     Pgf,
@@ -44,13 +44,13 @@ pub struct StyleSheet {
     /// Default corner radius for rounded rectangles (0 = sharp).
     pub corner_radius: f32,
     /// Default font for text widgets.
-    pub font: Rc<dyn VitaFont>,
+    pub font: Arc<dyn VitaFont>,
 }
 
 impl StyleSheet {
     /// Create a new stylesheet with the given font and default colors.
     pub fn new<F: VitaFont + 'static>(font: F) -> Self {
-        let font = Rc::new(font);
+        let font = Arc::new(font);
         Self {
             font,
             bg_color: Color::rgba(24, 24, 32, 255),
@@ -70,7 +70,7 @@ impl StyleSheet {
     }
 
     pub fn with_font<F: VitaFont + 'static>(mut self, font: F) -> Self {
-        self.font = Rc::new(font);
+        self.font = Arc::new(font);
         self
     }
 

@@ -15,7 +15,7 @@ use taffy::prelude::*;
 use vita2d_rs::prelude::Drawing;
 
 use crate::style::StyleSheet;
-use crate::widget::{Rect, Widget};
+use crate::widget::{IntoWidget, Rect, Widget};
 
 // ---------------------------------------------------------------------------
 // LayoutTree — the main layout engine
@@ -55,13 +55,13 @@ impl<'a> LayoutTree<'a> {
     ///
     /// The widget's [`Widget::measure`] is used by Taffy to determine
     /// the intrinsic size of the node.
-    pub fn add_widget(&mut self, widget: impl Widget + 'a, style: Style) -> NodeId {
+    pub fn add_widget(&mut self, widget: impl IntoWidget<'a>, style: Style) -> NodeId {
         let node = self
             .taffy
             .new_leaf(style)
             .expect("failed to create widget node");
         self.taffy
-            .set_node_context(node, Some(Box::new(widget)))
+            .set_node_context(node, Some(Box::new(widget.into_widget())))
             .expect("failed to set node context");
         node
     }
@@ -257,12 +257,12 @@ impl<'a, 'tree> Flex<'a, 'tree> {
     }
 
     /// Add a widget child with default Taffy style.
-    pub fn add_widget(&mut self, widget: impl Widget + 'tree) -> NodeId {
+    pub fn add_widget(&mut self, widget: impl IntoWidget<'tree>) -> NodeId {
         self.add_widget_styled(widget, Style::default())
     }
 
     /// Add a widget child with a custom Taffy style.
-    pub fn add_widget_styled(&mut self, widget: impl Widget + 'tree, style: Style) -> NodeId {
+    pub fn add_widget_styled(&mut self, widget: impl IntoWidget<'tree>, style: Style) -> NodeId {
         let node = self.tree.add_widget(widget, style);
         self.children.push(node);
         node

@@ -3,9 +3,7 @@
 //! Every widget can draw itself and report its intrinsic size for layout.
 //! Layout positions are provided by Taffy and passed via a [`Rect`].
 
-use taffy::{
-    prelude::{AvailableSpace, Size},
-};
+use taffy::prelude::{AvailableSpace, Size};
 use vita2d_rs::prelude::{Color, Drawing};
 
 use crate::style::StyleSheet;
@@ -95,6 +93,18 @@ where
 
     fn handle_input(&mut self, input: &vita_input::ControllerInput) -> bool {
         <T as Widget>::handle_input(&mut **self, input)
+    }
+}
+
+pub trait IntoWidget<'a> {
+    type WidgetType: Widget + 'a;
+    fn into_widget(self) -> Self::WidgetType;
+}
+
+impl<'a, T: Widget + 'a> IntoWidget<'a> for T {
+    type WidgetType = Self;
+    fn into_widget(self) -> Self::WidgetType {
+        self
     }
 }
 

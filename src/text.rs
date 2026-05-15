@@ -6,7 +6,7 @@ use taffy::prelude::{AvailableSpace, Size};
 use vita2d_rs::prelude::{Color, Drawing};
 
 use crate::style::StyleSheet;
-use crate::widget::{Rect, Widget};
+use crate::widget::{IntoWidget, Rect, Widget};
 
 /// A static text label.
 ///
@@ -41,6 +41,25 @@ impl<'a> Text<'a> {
     pub fn with_scale(mut self, scale: f32) -> Self {
         self.scale = scale;
         self
+    }
+}
+
+impl<'a> IntoWidget<'a> for &'a str {
+    type WidgetType = Text<'a>;
+    fn into_widget(self) -> Self::WidgetType {
+        Text::new(self)
+    }
+}
+impl<'a> IntoWidget<'a> for String {
+    type WidgetType = Text<'a>;
+    fn into_widget(self) -> Self::WidgetType {
+        Text::new(self)
+    }
+}
+impl<'a> IntoWidget<'a> for Cow<'a, str> {
+    type WidgetType = Text<'a>;
+    fn into_widget(self) -> Self::WidgetType {
+        Text::new(self)
     }
 }
 
