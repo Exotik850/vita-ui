@@ -93,7 +93,7 @@ pub struct App<
     Init = NoOp,
     Update = NoOp,
     Render = NoOp,
-    Input = NoOpInput,
+    Input = NoOp,
     F = NoOp,
     Event = vita_input::ControllerInput,
 > {
@@ -394,9 +394,6 @@ impl<Event, F: FnMut() -> Event> AppEventReceiver<Event> for F {
 /// A no-op type used as the default for all callback slots.
 pub struct NoOp;
 
-/// A no-op type specifically for the input callback slot.
-pub struct NoOpInput;
-
 impl<State, Event> AppInit<State, Event> for NoOp {
     fn init(&mut self, _state: &mut State) {}
 }
@@ -409,7 +406,7 @@ impl<State, Event> AppRender<State, Event> for NoOp {
     fn render(&mut self, _state: &mut State, _ctx: RenderCtx<'_, '_>) {}
 }
 
-impl<State, Event> AppInput<State, Event> for NoOpInput {
+impl<State, Event> AppInput<State, Event> for NoOp {
     fn input(&mut self, _state: &mut State, _event: Event) {}
 }
 

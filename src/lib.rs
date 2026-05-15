@@ -30,7 +30,7 @@ mod app;
 
 pub use app::{
     App, AppConfig, AppEventReceiver, AppInit, AppInput, AppRender, AppUpdate, FrameCtx, NoOp,
-    NoOpInput, RenderCtx,
+    RenderCtx,
 };
 
 /// Convenience re-exports.
