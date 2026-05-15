@@ -68,10 +68,6 @@ where
     ) -> Size<f32> {
         <T as Widget>::measure(*self, style, known_dimensions, available_space)
     }
-
-    fn handle_input(&mut self, _input: &vita_input::ControllerInput) -> bool {
-        false
-    }
 }
 
 impl<T> Widget for &mut T
@@ -96,6 +92,7 @@ where
     }
 }
 
+/// A trait for converting types into widgets.
 pub trait IntoWidget<'a> {
     type WidgetType: Widget + 'a;
     fn into_widget(self) -> Self::WidgetType;

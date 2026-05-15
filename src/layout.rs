@@ -55,7 +55,7 @@ impl<'a> LayoutTree<'a> {
     ///
     /// The widget's [`Widget::measure`] is used by Taffy to determine
     /// the intrinsic size of the node.
-    pub fn add_widget(&mut self, widget: impl IntoWidget<'a>, style: Style) -> NodeId {
+    pub fn widget(&mut self, widget: impl IntoWidget<'a>, style: Style) -> NodeId {
         let node = self
             .taffy
             .new_leaf(style)
@@ -257,13 +257,13 @@ impl<'a, 'tree> Flex<'a, 'tree> {
     }
 
     /// Add a widget child with default Taffy style.
-    pub fn add_widget(&mut self, widget: impl IntoWidget<'tree>) -> NodeId {
-        self.add_widget_styled(widget, Style::default())
+    pub fn widget(&mut self, widget: impl IntoWidget<'tree>) -> NodeId {
+        self.widget_styled(widget, Style::default())
     }
 
     /// Add a widget child with a custom Taffy style.
-    pub fn add_widget_styled(&mut self, widget: impl IntoWidget<'tree>, style: Style) -> NodeId {
-        let node = self.tree.add_widget(widget, style);
+    pub fn widget_styled(&mut self, widget: impl IntoWidget<'tree>, style: Style) -> NodeId {
+        let node = self.tree.widget(widget, style);
         self.children.push(node);
         node
     }
@@ -271,7 +271,7 @@ impl<'a, 'tree> Flex<'a, 'tree> {
     /// Add an empty spacer child with the given fixed size on the main axis.
     ///
     /// For a row, this is the width; for a column, this is the height.
-    pub fn add_spacer(&mut self, size: f32) -> NodeId {
+    pub fn spacer(&mut self, size: f32) -> NodeId {
         let spacer_style = match self.direction {
             FlexDir::Row => Style {
                 size: Size {
@@ -288,7 +288,7 @@ impl<'a, 'tree> Flex<'a, 'tree> {
                 ..Default::default()
             },
         };
-        let node = self.tree.add_widget(Spacer, spacer_style);
+        let node = self.tree.widget(Spacer, spacer_style);
         self.children.push(node);
         node
     }
@@ -297,13 +297,13 @@ impl<'a, 'tree> Flex<'a, 'tree> {
     ///
     /// The `grow` value (typically 1.0) controls how much this spacer
     /// expands relative to siblings.
-    pub fn add_flex_spacer(&mut self, grow: f32) -> NodeId {
+    pub fn flex_spacer(&mut self, grow: f32) -> NodeId {
         let spacer_style = Style {
             flex_grow: grow,
             flex_shrink: 0.0,
             ..Default::default()
         };
-        let node = self.tree.add_widget(Spacer, spacer_style);
+        let node = self.tree.widget(Spacer, spacer_style);
         self.children.push(node);
         node
     }
@@ -312,7 +312,7 @@ impl<'a, 'tree> Flex<'a, 'tree> {
     ///
     /// The closure receives a [`Flex`] builder for the nested container.
     /// Returns the [`NodeId`] of the nested container.
-    pub fn add_container(
+    pub fn container(
         &mut self,
         direction: FlexDir,
         f: impl FnOnce(&mut Flex<'_, 'tree>),
@@ -376,12 +376,12 @@ impl<'tree> LayoutTree<'tree> {
     }
 
     /// Create a row-direction flex container.
-    pub fn flex_row<'a>(&'a mut self) -> Flex<'a, 'tree> {
+    pub fn row<'a>(&'a mut self) -> Flex<'a, 'tree> {
         self.flex(FlexDir::Row)
     }
 
     /// Create a column-direction flex container.
-    pub fn flex_column<'a>(&'a mut self) -> Flex<'a, 'tree> {
+    pub fn column<'a>(&'a mut self) -> Flex<'a, 'tree> {
         self.flex(FlexDir::Column)
     }
 }

@@ -98,7 +98,7 @@ fn main() {
                 flex.padding(16.0).gap(12.0);
 
                 // --- Title ---
-                flex.add_widget(
+                flex.widget(
                     "vita-ui Demo"
                         .into_widget()
                         .with_color(Color::rgba(255, 220, 64, 255))
@@ -106,27 +106,27 @@ fn main() {
                 );
 
                 // --- Menu and panel side-by-side ---
-                flex.add_container(FlexDir::Row, |row| {
+                flex.container(FlexDir::Row, |row| {
                     row.gap(24.0);
-                    row.add_widget(&mut state.menu);
+                    row.widget(&mut state.menu);
 
                     if state.show_panel {
-                        row.add_container(FlexDir::Column, |panel| {
+                        row.container(FlexDir::Column, |panel| {
                             panel.padding(8.0).gap(8.0);
 
-                            panel.add_widget(
+                            panel.widget(
                                 "Info Panel"
                                     .into_widget()
                                     .with_color(Color::rgba(128, 200, 255, 255))
                                     .with_scale(1.0),
                             );
-                            panel.add_widget(
+                            panel.widget(
                                 "This panel can be toggled from the menu."
                                     .into_widget()
                                     .with_color(Color::rgba(200, 200, 220, 255))
                                     .with_scale(0.7),
                             );
-                            panel.add_widget(
+                            panel.widget(
                                 vita_ui::button::Button::new("Click Me")
                                     .with_width(120.0)
                                     .with_height(30.0),
@@ -136,7 +136,7 @@ fn main() {
                 });
 
                 // --- Status text ---
-                flex.add_widget(
+                flex.widget(
                     state
                         .status
                         .as_ref()
@@ -146,13 +146,13 @@ fn main() {
                 );
 
                 // --- Counter display ---
-                flex.add_widget(format!("Counter: {}", state.counter));
+                flex.widget(format!("Counter: {}", state.counter));
 
                 // --- Flex spacer to push footer to bottom ---
-                flex.add_flex_spacer(1.0);
+                flex.flex_spacer(1.0);
 
                 // --- Footer ---
-                flex.add_widget(
+                flex.widget(
                     "Use D-Pad to navigate, Cross to select."
                         .into_widget()
                         .with_color(Color::rgba(128, 128, 128, 255))

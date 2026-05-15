@@ -254,11 +254,11 @@ impl<'a, Msg: Clone> Widget for Menu<'a, Msg> {
                 .align_items(AlignItems::Stretch);
 
             if let Some(ref title) = self.title {
-                flex.add_widget(title);
+                flex.widget(title);
             }
 
             for (i, item) in self.items.iter().enumerate() {
-                flex.add_widget(MenuEntry {
+                flex.widget(MenuEntry {
                     label: item.label.as_ref(),
                     selected: i == self.selected,
                 });
