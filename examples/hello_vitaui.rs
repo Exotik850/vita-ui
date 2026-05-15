@@ -32,6 +32,8 @@ enum Message {
 fn main() {
     let (tx, rx) = std::sync::mpsc::sync_channel(4);
 
+    // TODO: Better way to send messages / hold state
+    // maybe use dioxus state? something similar? 
     let menu_items = vec![
         MenuItem::new("Increment Counter").on_select({
             let tx = tx.clone();
@@ -81,6 +83,7 @@ fn main() {
         .with_update(|_state: &mut AppState, _ctx: &FrameCtx| {
             // Any per-frame logic goes here.
         })
+        .with_event_receiver(ControllerInput::read)
         .with_input(|state: &mut AppState, input: ControllerInput| {
             // Route input to the menu.
             state.menu.handle_input(&input);
@@ -118,6 +121,7 @@ fn main() {
             // --- Build the layout tree ---
             // We rebuild each frame so the tree reflects current state.
             let mut tree = LayoutTree::new();
+            
 
             let root = tree.flex_with(FlexDir::Column, |flex| {
                 flex.padding(16.0).gap(12.0);

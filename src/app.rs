@@ -251,6 +251,11 @@ impl<
     /// This never returns. It initialises vita2d, enters the main loop,
     /// and tears down vita2d on drop.
     pub fn run(mut self) {
+        // if we have an input handler, we must have some way to get events
+        assert!(
+            self.input.is_none() || self.event_receiver.is_some(),
+            "if you provide an input handler, you must also provide an event receiver (e.g., by calling .with_event_receiver(ControllerInput::poll))"
+        );
         let vita = self.vita2d;
         vita.set_vsync(self.config.vsync);
         println!("vita-ui: Starting main loop with config: {:?}", self.config);
@@ -270,25 +275,15 @@ impl<
             } else {
                 None
             };
-
             vita.common_dialog_update();
-
-            // --- Input processing ---
-            // if let Some(event_receiver) = &mut self.event_receiver {
-            //     while let Some(event) = event_receiver.receive() {
-            //         input.merge(event);
-            //     }
-            // }
-
             if let Some(input_handler) = &mut self.input {
-                let input = match self.config.block_input {
-                    InputHandling::Polling => ControllerInput::poll(),
-                    InputHandling::Blocking => ControllerInput::read(),
-                };
+                let input = self
+                    .event_receiver
+                    .as_mut()
+                    .expect("input handler provided without event receiver")
+                    .receive();
+
                 input_handler.input(&mut self.state, input);
-                // for event in input.events() {
-                //     input_handler.input(&mut self.state, event);
-                // }
             }
 
             // --- Update ---
@@ -305,13 +300,11 @@ impl<
                 draw.set_clear_color(self.style.bg_color);
 
                 if let Some(render) = &mut self.render {
-                    {
-                        let ctx = RenderCtx {
-                            draw: &mut draw,
-                            style: &self.style,
-                        };
-                        render.render(&mut self.state, ctx);
-                    }
+                    let ctx = RenderCtx {
+                        draw: &mut draw,
+                        style: &self.style,
+                    };
+                    render.render(&mut self.state, ctx);
                 } else {
                     draw.clear_screen();
                 }
@@ -319,7 +312,6 @@ impl<
 
             vita.wait_rendering_done();
             vita.swap_buffers();
-            // `draw` is dropped here → vita2d_end_drawing() called
 
             // Frame pacing
             if let (Some(target), Some(start)) = (target_frame_time, frame_start) {
@@ -364,7 +356,7 @@ pub trait AppInput<State, Event = ControllerInput> {
 
 /// A source that produces events (e.g., polling controller state).
 pub trait AppEventReceiver<Event> {
-    fn receive(&mut self) -> Option<Event>;
+    fn receive(&mut self) -> Event;
 }
 
 // ---------------------------------------------------------------------------
@@ -395,8 +387,8 @@ impl<State, Event, F: FnMut(&mut State, Event)> AppInput<State, Event> for F {
     }
 }
 
-impl<Event, F: FnMut() -> Option<Event>> AppEventReceiver<Event> for F {
-    fn receive(&mut self) -> Option<Event> {
+impl<Event, F: FnMut() -> Event> AppEventReceiver<Event> for F {
+    fn receive(&mut self) -> Event {
         self()
     }
 }
@@ -427,8 +419,6 @@ impl<State, Event> AppInput<State, Event> for NoOpInput {
     fn input(&mut self, _state: &mut State, _event: Event) {}
 }
 
-impl<Event> AppEventReceiver<Event> for NoOp {
-    fn receive(&mut self) -> Option<Event> {
-        None
-    }
+impl AppEventReceiver<()> for NoOp {
+    fn receive(&mut self) -> () {}
 }
