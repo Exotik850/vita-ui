@@ -13,7 +13,7 @@ use vita_ui::{menu::MenuItem, prelude::*, widget::IntoWidget};
 /// The application state.
 struct AppState {
     /// The main menu (shared so it can be laid out and receive input).
-    menu: Menu<'static>,
+    menu: Menu<'static, Message>,
     /// A counter incremented by a button.
     counter: u32,
     /// Status message displayed below the menu.
@@ -22,6 +22,7 @@ struct AppState {
     show_panel: bool,
 }
 
+#[derive(Clone)]
 enum Message {
     Increment,
     Toggle,
@@ -30,35 +31,11 @@ enum Message {
 }
 
 fn main() {
-    let (tx, rx) = std::sync::mpsc::sync_channel(4);
-
-    // TODO: Better way to send messages / hold state
-    // maybe use dioxus state? something similar?
     let menu_items = vec![
-        MenuItem::new("Increment Counter").on_select({
-            let tx = tx.clone();
-            move || {
-                let _ = tx.send(Message::Increment);
-            }
-        }),
-        MenuItem::new("Toggle Panel").on_select({
-            let tx = tx.clone();
-            move || {
-                let _ = tx.send(Message::Toggle);
-            }
-        }),
-        MenuItem::new("Reset Counter").on_select({
-            let tx = tx.clone();
-            move || {
-                let _ = tx.send(Message::Reset);
-            }
-        }),
-        MenuItem::new("Exit (no-op)").on_select({
-            let tx = tx.clone();
-            move || {
-                let _ = tx.send(Message::Exit);
-            }
-        }),
+        MenuItem::new("Increment Counter").with_action(Message::Increment),
+        MenuItem::new("Toggle Panel").with_action(Message::Toggle),
+        MenuItem::new("Reset Counter").with_action(Message::Reset),
+        MenuItem::new("Exit (no-op)").with_action(Message::Exit),
     ];
 
     let state = AppState {
@@ -82,7 +59,7 @@ fn main() {
         .with_input(|state: &mut AppState, input: ControllerInput| {
             // Route input to the menu.
             state.menu.handle_input(&input);
-            while let Ok(msg) = rx.try_recv() {
+            if let Some(msg) = state.menu.take_action() {
                 match msg {
                     Message::Increment => {
                         state.counter += 1;

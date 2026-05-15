@@ -11,20 +11,29 @@ use crate::style::StyleSheet;
 use crate::widget::{Rect, Widget, draw_rounded_rect};
 
 /// A single item in a [`Menu`].
-pub struct MenuItem<'a> {
+pub struct MenuItem<'a, Msg = ()> {
     /// The display label.
     pub label: Cow<'a, str>,
-    /// Called when this item is activated.
+    /// Optional action emitted when this item is activated.
+    pub action: Option<Msg>,
+    /// Optional callback called when this item is activated.
     pub on_select: Option<Box<dyn FnMut()>>,
 }
 
-impl<'a> MenuItem<'a> {
+impl<'a, Msg> MenuItem<'a, Msg> {
     /// Create a new menu item.
     pub fn new(label: impl Into<Cow<'a, str>>) -> Self {
         Self {
             label: label.into(),
+            action: None,
             on_select: None,
         }
+    }
+
+    /// Attach an action payload to emit when this item is activated.
+    pub fn with_action(mut self, action: Msg) -> Self {
+        self.action = Some(action);
+        self
     }
 
     /// Set the selection callback.
@@ -35,11 +44,13 @@ impl<'a> MenuItem<'a> {
 }
 
 /// A vertical menu.
-pub struct Menu<'a> {
+pub struct Menu<'a, Msg = ()> {
     /// The menu items.
-    pub items: Vec<MenuItem<'a>>,
+    pub items: Vec<MenuItem<'a, Msg>>,
     /// Index of the currently selected item.
     pub selected: usize,
+    /// Action emitted by the most recent activation (if any).
+    activated_action: Option<Msg>,
     /// Optional title displayed above the items.
     title: Option<MenuTitle<'a>>,
     /// Custom width.  If `None`, auto-sizes.
@@ -146,12 +157,13 @@ impl<'a> Widget for MenuEntry<'a> {
     }
 }
 
-impl<'a> Menu<'a> {
+impl<'a, Msg> Menu<'a, Msg> {
     /// Create a new menu with the given items.
-    pub fn new(items: Vec<MenuItem<'a>>) -> Self {
+    pub fn new(items: Vec<MenuItem<'a, Msg>>) -> Self {
         Self {
             items,
             selected: 0,
+            activated_action: None,
             title: None,
             width: None,
         }
@@ -185,13 +197,23 @@ impl<'a> Menu<'a> {
         }
     }
 
+}
+
+impl<'a, Msg: Clone> Menu<'a, Msg> {
     /// Activate the currently selected item.
     pub fn activate(&mut self) {
+        self.activated_action = None;
         if let Some(item) = self.items.get_mut(self.selected) {
             if let Some(ref mut cb) = item.on_select {
                 cb();
             }
+            self.activated_action = item.action.clone();
         }
+    }
+
+    /// Take the last activation action (if any).
+    pub fn take_action(&mut self) -> Option<Msg> {
+        self.activated_action.take()
     }
 
     pub fn handle_input(&mut self, input: &ControllerInput) -> bool {
@@ -212,7 +234,7 @@ impl<'a> Menu<'a> {
     }
 }
 
-impl<'a> Widget for Menu<'a> {
+impl<'a, Msg: Clone> Widget for Menu<'a, Msg> {
     fn draw(&self, rect: Rect, draw: &Drawing, style: &StyleSheet) {
         // Background panel
         draw_rounded_rect(
